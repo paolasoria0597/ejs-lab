@@ -1,6 +1,6 @@
 const express = require('express');
 const app = express();
-app.use(express.json()); 
+
 
 const RESTAURANT = {
     name: 'The Green Byte Bistro',
@@ -51,12 +51,52 @@ const RESTAURANT = {
     ]
   }
   
+const menu = RESTAURANT.menu // extracting menu from RESTAURANTS obj 
+const mains = menu.filter((item) => item.category === "mains")
+const sides = menu.filter((item) => item.category === "sides")
+const desserts = menu.filter((item) => item.category === "desserts")
+
 
 app.get('/', (req, res) => {
-  res.render('home.ejs', {
-    msg: 'restaurant '
-  });
+ res.render('home.ejs', {RESTAURANT});
 });
+
+app.get('/menu',(req,res) =>{
+  res.render('menu.ejs', {
+    menu,
+    mains,
+    sides,
+    desserts
+  }) 
+} );
+
+app.get('/menu/:category', (req,res) => {
+  const category = req.params.category // getting the parameter value from the url /:category
+  let data // setting a data variable as placeholder for my filtered data 
+
+  if(category === "mains") {
+    data = mains // setting stat to mains if the category parameter is mains 
+  } else if(category === "sides"){
+    data = sides // setting data to sides if the category parameter is sides
+  } else {
+    data = desserts // anything else is set to desserts 
+  }
+
+  // the below capitalizes the word by extracting the first character from thw word using charAt(0), then converting that same extracted first letter of the word 
+  // to uppercase with toUppercase(). Then we append or interpolate the remainder of the word by removing the first letter which is lowercase and appending everything else
+  //  For exaple, the word sides
+  // sides becomes s when we do category.charAt(0)
+  // then s becomes S when we do .toUppercase()
+  // sides becomes => ides when we do category.slice(1) 
+  // finally category.charAt(0).toUpperCase() + category.slice(1) becomes Sides
+  const capitalizedCategory = category.charAt(0).toUpperCase() + category.slice(1) 
+  
+  res.render('category.ejs', {
+    category: capitalizedCategory,
+    data
+  })
+})
+
 
 app.listen(3000, () => {
     console.log('Listening on port 3000');
